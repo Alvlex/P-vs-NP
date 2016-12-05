@@ -7,41 +7,38 @@ import java.util.List;
 import java.util.Map;
 
 public class Background {
+
 	public static void main(String[] args) throws IOException {
 		UserInterface userInterface = new UserInterface();
-		FileRead fileRead = new FileRead();
-		Background background = new Background();
 		Time time = new Time();
 		int needed = userInterface.getNoNeeded();
+		if (needed == 0){
+			//Need to add functionality
+		}
 		long startTime = time.getStartTime();
-		List<Integer> names = fileRead.readFile("Names");
-		List<Integer> Restrictions = fileRead.readFile("Restrictions");
-		Map<Integer, Integer> restrictions = new HashMap<Integer, Integer>();
+
+		FileRead fileRead = new FileRead();
+		Background background = new Background();
+
+		List<String> names = fileRead.readFile("Names"), Restrictions = fileRead.readFile("Restrictions"), keyRestrictions = new ArrayList<String>(), valueRestrictions = new ArrayList<String>();
 		for (int i = 0; i < Restrictions.size(); i += 2){
-			restrictions.put(Restrictions.get(i), Restrictions.get(i+1));
+			keyRestrictions.add(Restrictions.get(i));
+			valueRestrictions.add(Restrictions.get(i + 1));
 		}
-		names = background.possible(needed, names, restrictions);
-		if (names.size() == 0){
-			System.out.println("No possible solution was reached!");
-		}
-		else{
-			System.out.println("Acceptable solution:");
-			for (int i = 0; i < names.size(); i ++){
-				System.out.println(names.get(i));
-			}
-		}
+		names = background.possible(needed, names, keyRestrictions, valueRestrictions);
+		userInterface.answer(names);
 		time.outputTotalTime(startTime);
 	}
 
-	public List<Integer> possible(int needed, List<Integer> names, Map<Integer, Integer> restrictions){
-		List<Integer> acceptable = new ArrayList<Integer>();
-		List<Integer> banned = new ArrayList<Integer>();
+	public List<String> possible(int needed, List<String> names, List<String> keyRestrictions, List<String> valueRestrictions){
+		List<String> acceptable = new ArrayList<String>();
+		Map<String, Integer> banned = new HashMap<String, Integer>();
 		for(int i = 0; i < needed; i ++){
 			for(int j = 0; j < banned.size(); j ++){
 				if (i >= names.size()){
 					break;
 				}
-				if (banned.contains(names.get(i))){
+				if (banned.keySet().contains(names.get(i))){
 					i ++;
 					needed ++;
 				}
@@ -53,13 +50,25 @@ public class Background {
 				acceptable.clear();
 				break;
 			}
-			if (restrictions.containsKey(names.get(i)) || restrictions.containsValue(names.get(i))){
-				for (int j = 0; j < restrictions.size(); j ++){
-					if (restrictions.keySet().toArray()[j] == names.get(i)){
-						banned.add(restrictions.get(names.get(i)));
+			if (keyRestrictions.contains(names.get(i)) || valueRestrictions.contains(names.get(i))){
+				if (banned.keySet().contains(names.get(i))){
+					for (int j = 0; j < keyRestrictions.size(); j ++){
+						if (keyRestrictions.get(j).equals(names.get(i))){
+							banned.replace(valueRestrictions.get(j), banned.get(valueRestrictions.get(j)) + 1);
+						}
+						if (valueRestrictions.get(j).equals(names.get(i))){
+							banned.replace(keyRestrictions.get(j), banned.get(keyRestrictions.get(j)) + 1);
+						}
 					}
-					if (restrictions.values().toArray()[j] == names.get(i)){
-						banned.add((Integer) restrictions.keySet().toArray()[j]);
+				}
+				else{
+					for (int j = 0; j < keyRestrictions.size(); j ++){
+						if (keyRestrictions.get(j).equals(names.get(i))){
+							banned.put(valueRestrictions.get(j), 1);
+						}
+						if (valueRestrictions.get(j).equals(names.get(i))){
+							banned.put(keyRestrictions.get(j), 1);
+						}
 					}
 				}
 			}
@@ -68,4 +77,23 @@ public class Background {
 		return acceptable;
 	}
 
+	public void reduceBanned(Map<String, Integer> banned, List<String> keyRestrictions, List<String> valueRestrictions){
+		int noOfBanned = banned.size();
+		String tempName;
+		int lowest = noOfBanned;
+		for (int i = 0; i > -1; i ++){
+			if (noOfBanned < lowest){
+				lowest = noOfBanned;
+			}
+			for (int j = 0; j < banned.size(); j ++){
+				tempName = (String) banned.keySet().toArray()[j];
+				if (banned.get(tempName) == i){
+					banned.remove(tempName);
+					
+				}
+			}
+
+			//Need to add functionality
+		}
+	}
 }

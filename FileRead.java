@@ -8,12 +8,12 @@ import java.util.List;
 
 public class FileRead {
 	
-	public List<Integer> readFile(String file) throws IOException{
-		List<Integer> names = new ArrayList<Integer>();
+	public List<String> readFile(String file) throws IOException{
+		List<String> names = new ArrayList<String>();
 		BufferedReader br = new BufferedReader(new FileReader(file));
 		String ln = br.readLine();
 		while (ln != null){
-			names.add(Integer.parseInt(ln));
+			names.add(ln);
 			ln = br.readLine();
 		}
 		br.close();
